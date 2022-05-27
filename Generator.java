@@ -1,24 +1,27 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Generator {
-    public Page[] generatePages(int stringLength, int pageRangeLow, int pageRangeHigh,
-                               int frameNumber, int howOftenLocality, int howManyLocality, int probability) {
-        Page[] pages = new Page[stringLength];
+    public List<Page> generatePages(int stringLength, int pageRangeLow, int pageRangeHigh,
+                                    int frameNumber, int processesNumber, int howOftenLocality, int howManyLocality, double probability) {
+        //Page[] pages = new Page[stringLength];
+        List<Page> pages = new ArrayList<>();
         int licznik = 0;
-
-        for (int i = 0; i < stringLength; i++) {
+        int i = 0;
+        while(pages.size()!=stringLength){
             if (ifOccuring(probability)) {
                 if (licznik == howOftenLocality) {
-                    i = localityGenerator(howManyLocality, pages, frameNumber, i) - 1; //tutaj i to appealTime
+                    i = localityGenerator(howManyLocality, pages, frameNumber/(processesNumber + processesNumber/2), stringLength); //tutaj i to appealTime
                     licznik = 0;
                 } else {
-                    pages[i] = generatePage(pageRangeLow, pageRangeHigh,i);
+                    pages.add(generatePage(pageRangeLow, pageRangeHigh,i));
                     licznik++;
                 }
-            } else {
-                i--;
             }
+            i++;
         }
+
         return pages;
     }
 
@@ -30,14 +33,15 @@ public class Generator {
         return true;
     }
 
-    public int localityGenerator(int howMany, Page[] pages, int frameNumber, int currentIndex) {
+    public int localityGenerator(int howMany, List<Page> pages, int frameNumber, int stringLenght) {
         int i = 0;
-        while (currentIndex < pages.length && i < howMany) {
-            pages[currentIndex] = new Page(currentIndex, localityPage(pages, currentIndex, frameNumber));
+        int currentIndex = pages.size();
+        while (currentIndex < stringLenght && i < howMany) {
+            pages.add(new Page(pages.get(pages.size()-1).getAppealTime()+1, localityPage(pages, currentIndex, frameNumber)));
             currentIndex++;
             i++;
         }
-        return currentIndex;
+        return pages.get(pages.size()-1).getAppealTime();
     }
 
     public void printPages(int[] pages) {
@@ -63,7 +67,7 @@ public class Generator {
         return false;
     }
 
-    public int localityPage(Page[] pages, int i, int frameNumber) {
+    public int localityPage(List<Page> pages, int i, int frameNumber) {
         boolean fullFrames = false;
         int[] frames = new int[frameNumber];
 
@@ -71,8 +75,8 @@ public class Generator {
         int numberOfPagesInFrame = 0;
 
         while ((index >= 0) && !fullFrames) {
-            if (!isInFrame(frames, numberOfPagesInFrame, pages[index].getNumber())) {
-                frames[numberOfPagesInFrame] = pages[index].getNumber();
+            if (!isInFrame(frames, numberOfPagesInFrame, pages.get(index).getNumber())) {
+                frames[numberOfPagesInFrame] = pages.get(index).getNumber();
                 numberOfPagesInFrame++;
             }
             if (numberOfPagesInFrame == frameNumber) {

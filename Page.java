@@ -6,6 +6,7 @@ public class Page {
     public Page(int appealTime, int number) {
         this.appealTime = appealTime;
         this.number = number;
+        lastUsageTime = 0;
     }
 
 
